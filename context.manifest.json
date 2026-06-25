@@ -1,0 +1,33 @@
+{
+  "repo": "domain_coloring",
+  "type": "color_generator",
+  "domain": "complex_visualization",
+  "description": "Domain coloring of the complex plane: phase portraits as psychedelic rosettes. Power, rational, Mobius, elliptic, zeta functions. Absorbs complex_function_viz.",
+  "batch": "color_lab_batch2",
+  "consumes": [
+    "color_systems"
+  ],
+  "consumed_by": [],
+  "archetype": "COMPLEX_VIZ",
+  "tech_stack": [
+    "webgl2",
+    "glsl",
+    "vanilla_js"
+  ],
+  "keywords": [
+    "complex",
+    "domain_coloring",
+    "rosette",
+    "phase_portrait",
+    "zeta"
+  ],
+  "canon": {
+    "fbo_ping_pong": true,
+    "additive_blend": true,
+    "1d_ramp": "color_systems.js",
+    "post_finisher": true
+  },
+  "priority": 4,
+  "difficulty": "medium",
+  "status": "briefed"
+}
