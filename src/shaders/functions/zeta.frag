@@ -15,10 +15,10 @@ vec2 cnpow_neg(float nf, vec2 s) {
 
 vec2 eta(vec2 s) {
   vec2 acc = vec2(0.0);
-  float sign = 1.0;
+  float sgn = 1.0;                  // not `sign`: that shadows the GLSL built-in
   for (int n = 1; n <= ZETA_TERMS; n++) {
-    acc += sign * cnpow_neg(float(n), s);
-    sign = -sign;
+    acc += sgn * cnpow_neg(float(n), s);
+    sgn = -sgn;
   }
   return acc;
 }

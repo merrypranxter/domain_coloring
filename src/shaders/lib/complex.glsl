@@ -32,13 +32,15 @@ vec2 cmul(vec2 a, vec2 b) {
 }
 
 // a / b = a * conj(b) / |b|^2
+// The tiny epsilon keeps poles (b -> 0) as large finite values instead of
+// NaN/Inf, which some drivers render as black/white holes.
 vec2 cdiv(vec2 a, vec2 b) {
-  float d = dot(b, b);
+  float d = dot(b, b) + 1e-20;
   return vec2(a.x * b.x + a.y * b.y,
               a.y * b.x - a.x * b.y) / d;
 }
 
-vec2 cinv(vec2 z) { return conj(z) / dot(z, z); }
+vec2 cinv(vec2 z) { return conj(z) / (dot(z, z) + 1e-20); }
 
 vec2 csqr(vec2 z) { return vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y); }
 
@@ -60,8 +62,10 @@ vec2 cpowc(vec2 z, vec2 w) { return cexp(cmul(w, clog(z))); }
 
 vec2 csqrt(vec2 z) {
   float r = length(z);
-  float a = sqrt(0.5 * (r + z.x));
-  float b = sqrt(0.5 * (r - z.x)) * sign(z.y == 0.0 ? 1.0 : z.y);
+  // r >= |z.x| analytically, but max(0.0, ...) guards float rounding from
+  // pushing the argument slightly negative -> NaN.
+  float a = sqrt(max(0.0, 0.5 * (r + z.x)));
+  float b = sqrt(max(0.0, 0.5 * (r - z.x))) * sign(z.y == 0.0 ? 1.0 : z.y);
   return vec2(a, b);
 }
 

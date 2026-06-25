@@ -221,8 +221,10 @@ async function main() {
     status();
   }, { passive: false });
 
-  // Click (or drag) to recenter on the complex coordinate under the cursor.
-  function recenter(ev) {
+  // Click recenters on the coordinate under the cursor; drag pans by the
+  // frame-to-frame mouse delta. (Recentering on every mousemove would add the
+  // absolute offset-from-center each event and fling the view to infinity.)
+  function recenterOn(ev) {
     const rect = canvas.getBoundingClientRect();
     const uvx = (ev.clientX - rect.left) / rect.width - 0.5;
     const uvy = 0.5 - (ev.clientY - rect.top) / rect.height;
@@ -231,10 +233,24 @@ async function main() {
     view.center[1] += uvy * view.zoom;
     status();
   }
-  let dragging = false;
-  canvas.addEventListener('mousedown', (e) => { dragging = true; recenter(e); });
-  canvas.addEventListener('mousemove', (e) => { if (dragging) recenter(e); });
-  window.addEventListener('mouseup', () => { dragging = false; });
+  let dragging = false, moved = false, lastX = 0, lastY = 0;
+  canvas.addEventListener('mousedown', (e) => {
+    dragging = true; moved = false; lastX = e.clientX; lastY = e.clientY;
+  });
+  canvas.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    const rect = canvas.getBoundingClientRect();
+    const aspect = canvas.width / canvas.height;
+    view.center[0] -= ((e.clientX - lastX) / rect.width) * aspect * view.zoom;
+    view.center[1] += ((e.clientY - lastY) / rect.height) * view.zoom;
+    lastX = e.clientX; lastY = e.clientY;
+    moved = true;
+    status();
+  });
+  window.addEventListener('mouseup', (e) => {
+    if (dragging && !moved) recenterOn(e);   // a clean click (no drag) recenters
+    dragging = false;
+  });
 
   // --- render loop --------------------------------------------------------
   const start = performance.now();

@@ -61,7 +61,9 @@ void main() {
   if (u_colorMode == 0) {
     // High, near-constant chroma for the neon look; ease off only at the very
     // ends of the lightness band where OKLCH runs out of gamut.
-    float chroma = 0.155 * smoothstep(0.0, 0.30, light) * smoothstep(1.0, 0.78, light);
+    // GLSL smoothstep is undefined when edge0 >= edge1, so the high-end roll-off
+    // is written as (1 - smoothstep) with ascending edges.
+    float chroma = 0.155 * smoothstep(0.0, 0.30, light) * (1.0 - smoothstep(0.78, 1.0, light));
     rgb = oklch_to_srgb(vec3(light, max(chroma, 0.05), hue));
   } else {
     rgb = hsv_to_srgb(vec3(hue, 0.9, clamp(light + 0.1, 0.0, 1.0)));
