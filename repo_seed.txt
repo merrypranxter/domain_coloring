@@ -1,0 +1,178 @@
+# domain_coloring — REPO SEED
+
+## The Goldmine
+
+Every pixel is a complex number. Paint it by where the function sends it. This is the oldest trick in mathematical visualization — and it still produces images that look like alien flowers. Domain coloring turns the complex plane into a psychedelic garden: poles bloom outward, zeros suck inward, branch cuts slice through like neon scars. The phase wheel spins, the magnitude contours ripple, and you are looking at the soul of a function.
+
+## The Math
+
+### Complex Arithmetic in GLSL
+GLSL has no native complex type. Build one with vec2 (real, imag):
+```glsl
+vec2 cmul(vec2 a, vec2 b) {
+  return vec2(a.x*b.x - a.y*b.y, a.x*b.y + a.y*b.x);
+}
+vec2 cdiv(vec2 a, vec2 b) {
+  float denom = dot(b, b);
+  return vec2(dot(a,b), a.y*b.x - a.x*b.y) / denom;
+}
+vec2 cexp(vec2 z) {
+  return exp(z.x) * vec2(cos(z.y), sin(z.y));
+}
+vec2 clog(vec2 z) {
+  return vec2(log(length(z)), atan(z.y, z.x));
+}
+vec2 cpow(vec2 z, float n) {
+  float r = length(z);
+  float theta = atan(z.y, z.x);
+  return pow(r, n) * vec2(cos(n*theta), sin(n*theta));
+}
+```
+
+### Phase and Magnitude
+For `w = f(z)`:
+```
+hue = arg(w) / (2π)  // mapped to [0,1]
+lightness = log(|w|) // log-scaled for dynamic range
+```
+- Phase wrap at ±π creates the branch cut line (a feature, not a bug).
+- Magnitude contours at powers of 2 create the "ripple" effect.
+
+### The Functions
+- **Power:** `f(z) = z^n` → n-fold rosettes. n=5 = flower of light.
+- **Rational:** `f(z) = (z^n − 1)/(z^m + c)` → zeros bloom, poles suck. The money shot.
+- **Möbius:** `(az+b)/(cz+d)` → conformal warps. Shares math with `kleinian_groups`.
+- **Exp/Trig:** `sin(z)`, `exp(z)`, `log(z)` → periodic stripes + branch cuts.
+- **Elliptic:** Weierstrass ℘(z) → doubly-periodic, auto-tiling wallpaper.
+- **Zeta:** Riemann ζ(s) → the critical strip. Famous and eerie.
+- **Newton:** Basins of attraction → root-colored fractal.
+
+## The GLSL / JS Pipeline
+
+### Pass Order
+1. **Map** pixel to complex plane (`u_center`, `u_zoom`).
+2. **Evaluate** `f(z)` via chosen engine + `complex.glsl`.
+3. **Compute** phase → hue; magnitude → log-scaled lightness.
+4. **Enhance** with sawtooth contours on magnitude, phase lines at π/6.
+5. **Color** via OKLCH wheel (`color_systems`) or raw HSV toggle.
+6. **Post** light chromatic + vignette.
+
+### Domain Coloring Fragment Shader
+```glsl
+uniform vec2 u_center;
+uniform float u_zoom;
+uniform int u_function; // 0=power, 1=rational, etc.
+
+in vec2 v_uv;
+out vec4 fragColor;
+
+// complex.glsl functions
+vec2 f(vec2 z) {
+  // power: z^5
+  return cpow(z, 5.0);
+}
+
+void main() {
+  vec2 z = u_center + (v_uv - 0.5) * u_zoom;
+  vec2 w = f(z);
+  
+  float phase = atan(w.y, w.x) / (2.0 * 3.14159);
+  float mag = length(w);
+  float lightness = 0.5 + 0.1 * log(mag + 1.0);
+  
+  // OKLCH coloring via color_systems
+  vec3 rgb = oklch_to_srgb(vec3(lightness, 0.3, phase));
+  fragColor = vec4(rgb, 1.0);
+}
+```
+
+## Aesthetic Post + Tonal Guide
+
+### Rosette
+`power.glsl`, n=5, OKLCH wheel, contours on. Flower of light. Clean, symmetrical, hypnotic.
+
+### Pole Bloom
+`rational.glsl`, n=3 m=2, c=0.4+0.3i. Clustered poles. Neon whirlpools. The most "psychedelic" of the set.
+
+### Zeta Strip
+`zeta.glsl`, view box Re∈[−5,40] Im∈[−20,20]. The haunted one. The critical strip glows.
+
+### Elliptic Tiling
+`elliptic.glsl`, half-periods (1, i). Seamless wallpaper. Doubly-periodic = auto-tiling.
+
+### Branch Neon
+`exp_trig.glsl`, `log(z)`. Branch cut lit hot magenta. The discontinuity is the art.
+
+## Repo Architecture
+
+```
+domain_coloring/
+├── README.md
+├── repo_seed.txt
+├── context.manifest.json
+├── index.html
+├── .gitignore
+├── src/
+│   ├── js/
+│   │   ├── main.js
+│   │   └── function-selector.js
+│   ├── shaders/
+│   │   ├── lib/
+│   │   │   └── complex.glsl
+│   │   ├── functions/
+│   │   │   ├── power.frag
+│   │   │   ├── rational.frag
+│   │   │   ├── mobius.frag
+│   │   │   ├── exp_trig.frag
+│   │   │   ├── elliptic.frag
+│   │   │   ├── zeta.frag
+│   │   │   └── newton.frag
+│   │   └── display.frag
+│   └── data/
+│       └── presets.json
+└── docs/
+    ├── visual-targets.md
+    └── complex-math.md
+```
+
+## Code Snippets to Seed Copilot
+
+### Complex Arithmetic Header (complex.glsl)
+```glsl
+vec2 cmul(vec2 a, vec2 b) {
+  return vec2(a.x*b.x - a.y*b.y, a.x*b.y + a.y*b.x);
+}
+vec2 cdiv(vec2 a, vec2 b) {
+  float d = dot(b,b);
+  return vec2(a.x*b.x + a.y*b.y, a.y*b.x - a.x*b.y) / d;
+}
+vec2 cexp(vec2 z) { return exp(z.x) * vec2(cos(z.y), sin(z.y)); }
+vec2 clog(vec2 z) { return vec2(log(length(z)), atan(z.y, z.x)); }
+vec2 cpow(vec2 z, float n) {
+  float r = length(z), th = atan(z.y, z.x);
+  return pow(r,n) * vec2(cos(n*th), sin(n*th));
+}
+vec2 csin(vec2 z) {
+  return vec2(sin(z.x)*cosh(z.y), cos(z.x)*sinh(z.y));
+}
+vec2 ccos(vec2 z) {
+  return vec2(cos(z.x)*cosh(z.y), -sin(z.x)*sinh(z.y));
+}
+```
+
+### Rational Function
+```glsl
+vec2 f_rational(vec2 z, float n, float m, vec2 c) {
+  vec2 zn = cpow(z, n);
+  vec2 zm = cpow(z, m);
+  vec2 num = zn - vec2(1.0, 0.0);
+  vec2 denom = zm + c;
+  return cdiv(num, denom);
+}
+```
+
+## Closing Directive
+
+Build `complex.glsl` first — it's the spine. Then the power function (easiest). Then rational (the money shot). Then the display shader with OKLCH coloring via `color_systems`. The win condition: a 5-fold rosette where the phase wheel spins smoothly and the magnitude contours ripple outward. Every pixel is a complex number. Color is math with wavelengths.
+
+**BEFORE WRITING CODE, read `repo_seed.txt` and `context.manifest.json`.** Reuse `color_systems` for the OKLCH phase wheel. Do not reimplement complex arithmetic.

@@ -1,0 +1,22 @@
+{
+  "name": "domain_coloring",
+  "version": "0.1.0",
+  "description": "Domain coloring of the complex plane: phase portraits as psychedelic rosettes (power, rational, Mobius, elliptic, zeta, Newton).",
+  "type": "module",
+  "scripts": {
+    "start": "node serve.mjs",
+    "dev": "node serve.mjs",
+    "example:cpu": "node examples/cpu-reference.mjs"
+  },
+  "keywords": [
+    "complex",
+    "domain-coloring",
+    "phase-portrait",
+    "webgl2",
+    "glsl",
+    "zeta",
+    "rosette"
+  ],
+  "license": "MIT",
+  "private": true
+}

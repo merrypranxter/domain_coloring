@@ -1,0 +1,82 @@
+{
+  "$schema": "./presets.schema.json",
+  "presets": {
+    "rosette": {
+      "label": "Rosette — z^5",
+      "function": "power",
+      "center": [0.0, 0.0],
+      "zoom": 4.0,
+      "colorMode": "oklch",
+      "contours": true,
+      "params": { "n": 5.0 }
+    },
+    "pole_bloom": {
+      "label": "Pole Bloom — (z^3-1)/(z^2+c)",
+      "function": "rational",
+      "center": [0.0, 0.0],
+      "zoom": 4.0,
+      "colorMode": "oklch",
+      "contours": true,
+      "params": { "n": 3.0, "m": 2.0, "c": [0.4, 0.3] }
+    },
+    "zeta_strip": {
+      "label": "Zeta Strip — ζ(s)",
+      "function": "zeta",
+      "center": [17.5, 0.0],
+      "zoom": 40.0,
+      "colorMode": "oklch",
+      "contours": true,
+      "params": {}
+    },
+    "elliptic_tiling": {
+      "label": "Elliptic Tiling — ℘(z)",
+      "function": "elliptic",
+      "center": [0.0, 0.0],
+      "zoom": 6.0,
+      "colorMode": "oklch",
+      "contours": true,
+      "params": { "period1": [2.0, 0.0], "period2": [0.0, 2.0] }
+    },
+    "branch_neon": {
+      "label": "Branch Neon — log(z)",
+      "function": "exp_trig",
+      "center": [0.0, 0.0],
+      "zoom": 6.0,
+      "colorMode": "oklch",
+      "contours": false,
+      "params": { "variant": 2 }
+    },
+    "newton_basins": {
+      "label": "Newton Basins — z^3-1",
+      "function": "newton",
+      "center": [0.0, 0.0],
+      "zoom": 4.0,
+      "colorMode": "oklch",
+      "contours": false,
+      "params": { "n": 3.0 }
+    },
+    "mobius_swirl": {
+      "label": "Möbius Swirl",
+      "function": "mobius",
+      "center": [0.0, 0.0],
+      "zoom": 6.0,
+      "colorMode": "oklch",
+      "contours": true,
+      "params": {
+        "mob_a": [1.0, 0.0],
+        "mob_b": [0.0, 1.0],
+        "mob_c": [-1.0, 0.0],
+        "mob_d": [1.0, 0.0]
+      }
+    }
+  },
+  "keymap": {
+    "1": "rosette",
+    "2": "pole_bloom",
+    "3": "zeta_strip",
+    "4": "elliptic_tiling",
+    "5": "branch_neon",
+    "6": "newton_basins",
+    "7": "mobius_swirl"
+  }
+}
